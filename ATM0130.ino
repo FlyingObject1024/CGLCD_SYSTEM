@@ -6,12 +6,11 @@
 #define swap(x,y) do{uint8_t temp=x;x=y;y=temp;}while(0)
 
 ATM0130::ATM0130(uint8_t pin_dat_cmd, uint8_t pin_reset) {
-  
   dat_cmd = pin_dat_cmd;
+  frame = 0;
   reset = pin_reset;
   pinMode(dat_cmd, OUTPUT);
   pinMode(reset, OUTPUT);
-
   pinMode(SS, OUTPUT);
   pinMode(SCK, OUTPUT);
   pinMode(MOSI, OUTPUT);
@@ -20,10 +19,8 @@ ATM0130::ATM0130(uint8_t pin_dat_cmd, uint8_t pin_reset) {
   SPI.begin();
   //↑これがなかったから表示されていなかった。
 
-  setFigColor(0x0000);
-  setCharColor(0xFFFF);
-  setCharColorBG(0x00);
-  
+  setColor(0x0000);
+
 }
 
 void ATM0130::begin(void) {
@@ -156,82 +153,8 @@ void ATM0130::begin(void) {
 }
 
 
-void ATM0130::setFigColor(uint8_t r, uint8_t g, uint8_t b) {
-  fig_color = convRGB(r, g, b);
-}
-
-void ATM0130::setFigColor(uint16_t c) {
-  fig_color = c;
-}
-
-void ATM0130::drawRectangle(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
-  uint16_t loop = width * height;
-  uint8_t colorH = fig_color >> 8;
-  uint8_t colorL = fig_color & 0x00FF;
-
-  SPI.beginTransaction(spi_settings);
-  digitalWrite(SS, LOW);
-  setWindow(x, y, width, height);
-
-  digitalWrite(dat_cmd, HIGH);
-  for (uint16_t i = 0; i < loop; i++) {
-    SPI.transfer(colorH);
-    SPI.transfer(colorL);
-  }
-  digitalWrite(SS, HIGH);
-  SPI.endTransaction();
-}
-
-void ATM0130::setCharPlace(uint8_t x, uint8_t y) {
-  char_x = x;
-  char_y = y;
-}
-
-void ATM0130::setCharColor(uint8_t r, uint8_t g, uint8_t b) {
-  char_color = convRGB(r, g, b);
-}
-
-void ATM0130::setCharColor(uint16_t c) {
-  char_color = c;
-}
-
-void ATM0130::setCharColorBG(uint8_t r, uint8_t g, uint8_t b) {
-  char_color_bg = convRGB(r, g, b);
-}
-
-void ATM0130::setCharColorBG(uint16_t c) {
-  char_color_bg = c;
-}
-
-void ATM0130::print(char ch) {
-  if (char_x > 235) {
-    char_x = 0;
-    char_y += 8;
-  }
-  if (char_y > 232) {
-    char_x = 0;
-    char_y = 0;
-  }
-
-  if (ch == '\n') {
-    char_x = 0;
-    char_y += 8;
-  }
-  else {
-    setCharQueue(ch);
-    SPI.beginTransaction(spi_settings);
-    digitalWrite(SS, LOW);
-    writeCharQueue();
-    char_x += 6;
-    digitalWrite(SS, HIGH);
-    SPI.endTransaction();
-  }
-}
-
-void ATM0130::print(String str) {
-  uint8_t len = str.length();
-  for (uint8_t i = 0; i < len; i++)
-    print(str.charAt(i));
+void ATM0130::setColor(uint16_t c) {
+  color = c;
 }
 
 void ATM0130::writeReg(uint8_t data) {
@@ -275,38 +198,6 @@ void ATM0130::putPixel(uint16_t color) {
   SPI.transfer(color & 0xFF);
 }
 
-void ATM0130::setCharQueue(uint8_t c) {
-  if ((c >= 0x20) && (c <= 0x7E)) {
-    c -= 0x20;
-    for (uint8_t i = 0; i < 5; i++) {
-      char_queue[i] = chars[5 * c + i];
-    }
-  }
-  else {
-    for (uint8_t i = 0; i < 5; i++) {
-      char_queue [i] = 0xFF;
-    }
-  }
-}
-
-void ATM0130::writeCharQueue() {
-  setWindow(char_x, char_y, 5, 8);
-  for (uint8_t i = 0; i < 5; i++) {
-    for (uint8_t j = 0; j < 8; j++) {
-      if ((char_queue[i] & (0x80 >> j)) > 0) {
-        putPixel(char_color);
-      }
-      else {
-        putPixel(char_color_bg);
-      }
-    }
-  }
-  setWindow(char_x + 5, char_y, 1, 8);
-  for (uint8_t i = 0; i < 8; i++) {
-    putPixel(char_color_bg);
-  }
-}
-
 uint16_t ATM0130::convRGB(uint8_t red, uint8_t green, uint8_t blue) {
   uint16_t color = 0;
   color = blue >> 3;
@@ -315,71 +206,192 @@ uint16_t ATM0130::convRGB(uint8_t red, uint8_t green, uint8_t blue) {
   return color;
 }
 
+void ATM0130::drawBlock_4px(int16_t x, int16_t y, const uint16_t (&block)[4][4]) {
+  uint8_t firsti = 0, endi = 4;
+  uint8_t firstj = 0, endj = 4; //firsti,firstjを経由しないと下の二重ループがちゃんと機能しない。
+  if (x < 0) firsti = abs(x);
+  else if (x + endi > WIDTH) endi = WIDTH;
+  if (y < 0) firstj = abs(y);
+  else if (y + endj > HEIGHT) endj = HEIGHT;
 
-
-
-inline void ATM0130::updatePoint(int16_t x, int16_t y, uint16_t color){
-  if(x < 0 || WIDTH <= x || y < 0 || HEIGHT <= y) return;
-  backScreen[y][x] = color;
-}
-
-inline void ATM0130::updateBlock_8px(int16_t x, int16_t y, uint16_t block[8][8]){
-  uint8_t firsti = 0,endi = 8;
-  uint8_t firstj = 0,endj = 8;//firsti,firstjを経由しないと下の二重ループがちゃんと機能しない。
-  if(x < 0) firsti = abs(x);
-  else if(x+endi > WIDTH) endi = WIDTH;
-  if(y < 0) firstj = abs(y);
-  else if(y+endj > HEIGHT) endj = HEIGHT;
-
-  for(uint8_t j=firstj;j<endj;j++){
-    for(uint8_t i=firsti;i<endi;i++){
-      backScreen[y+j][x+i] = block[j][i];
+  for (uint8_t j = firstj; j < endj; j++) {
+    for (uint8_t i = firsti; i < endi; i++) {
+      if (pgm_read_word_near(&(block[j][i])) == SKELETON) continue;
+      else backScreen[y + j][x + i] = pgm_read_word_near(&(block[j][i]));
     }
   }
   return;
 }
 
-inline void ATM0130::updateBlock_16px(int16_t x, int16_t y, uint16_t block[16][16]){
-  int i = 0,endi = 16;
-  int j = 0,endj = 16;
-  if(x < 0) i -= x;
-  else if(x+endi > WIDTH) endi = WIDTH;
-  if(y < 0) j -= y;
-  else if(y+endj > HEIGHT) endj = HEIGHT;
+void ATM0130::drawBlock_8px(int16_t x, int16_t y, const uint16_t (&block)[8][8]) {
+  uint8_t firsti = 0, endi = 8;
+  uint8_t firstj = 0, endj = 8; //firsti,firstjを経由しないと下の二重ループがちゃんと機能しない。
+  if (x < 0) firsti = abs(x);
+  else if (x + endi > WIDTH) endi = WIDTH;
+  if (y < 0) firstj = abs(y);
+  else if (y + endj > HEIGHT) endj = HEIGHT;
 
-  for(i;i<endi;i++){
-    for(j;j<endj;j++){
-      backScreen[y+j][x+i] = block[j][i];
+  for (uint8_t j = firstj; j < endj; j++) {
+    for (uint8_t i = firsti; i < endi; i++) {
+      if (pgm_read_word_near(&(block[j][i])) == SKELETON) continue;
+      else backScreen[y + j][x + i] = pgm_read_word_near(&(block[j][i]));
     }
-  }  
+  }
+  return;
 }
 
-inline void ATM0130::updateBlock_32px(int16_t x, int16_t y, uint16_t block[32][32]){
-  int i = 0,endi = 32;
-  int j = 0,endj = 32;
-  if(x < 0) i -= x;
-  else if(x+endi > WIDTH) endi = WIDTH;
-  if(y < 0) j -= y;
-  else if(y+endj > HEIGHT) endj = HEIGHT;
+void ATM0130::drawBlock_16px(int16_t x, int16_t y, const uint16_t (&block)[16][16]) {
+  uint8_t firsti = 0, endi = 16;
+  uint8_t firstj = 0, endj = 16; //firsti,firstjを経由しないと下の二重ループがちゃんと機能しない。
+  if (x < 0) firsti = abs(x);
+  else if (x + endi > WIDTH) endi = WIDTH;
+  if (y < 0) firstj = abs(y);
+  else if (y + endj > HEIGHT) endj = HEIGHT;
 
-  for(i;i<endi;i++){
-    for(j;j<endj;j++){
-      backScreen[y+j][x+i] = block[j][i];
+  for (uint8_t j = firstj; j < endj; j++) {
+    for (uint8_t i = firsti; i < endi; i++) {
+      if (pgm_read_word_near(&(block[j][i])) == SKELETON) continue;
+      else backScreen[y + j][x + i] = pgm_read_word_near(&(block[j][i]));
     }
-  }  
+  }
+  return;
 }
 
-void ATM0130::updateScreen(){
+void ATM0130::drawBlock_16px(int16_t x, int16_t y, const uint16_t (&block)[16][16], uint8_t cut_top, uint8_t cut_bottom, uint8_t cut_left, uint8_t cut_right) {
+  volatile uint8_t firsti = cut_left, endi = 16 - cut_right;
+  volatile uint8_t firstj = cut_top , endj = 16 - cut_bottom;  //firsti,firstjを経由しないと下の二重ループがちゃんと機能しない。
+
+  if (x < 0) firsti = abs(x);
+  else if (x + endi > WIDTH) endi = WIDTH;
+  if (y < 0) firstj = abs(y);
+  else if (y + endj > HEIGHT) endj = HEIGHT;
+
+  for (uint8_t j = firstj; j < endj; j++) {
+    for (uint8_t i = firsti; i < endi; i++) {
+      if (pgm_read_word_near(&(block[j][i])) == SKELETON) continue;
+      backScreen[y + j][x + i] = pgm_read_word_near(&(block[j][i]));
+    }
+  }
+  return;
+}
+
+void ATM0130::drawBlock_32px(int16_t x, int16_t y, const uint16_t (&block)[32][32]) {
+  uint8_t firsti = 0, endi = 32;
+  uint8_t firstj = 0, endj = 32; //firsti,firstjを経由しないと下の二重ループがちゃんと機能しない。
+  if (x < 0) firsti = abs(x);
+  else if (x + endi > WIDTH) endi = WIDTH;
+  if (y < 0) firstj = abs(y);
+  else if (y + endj > HEIGHT) endj = HEIGHT;
+
+  for (uint8_t j = firstj; j < endj; j++) {
+    for (uint8_t i = firsti; i < endi; i++) {
+      if (pgm_read_word_near(&(block[j][i])) == SKELETON) continue;
+      backScreen[y + j][x + i] = pgm_read_word_near(&(block[j][i]));
+    }
+  }
+  return;
+}
+
+void ATM0130::drawBlock(int16_t x, int16_t y, uint8_t sizex, uint8_t sizey, uint16_t (*block)) {
+  uint8_t firsti = 0, endi = sizex;
+  uint8_t firstj = 0, endj = sizey;
+
+  uint16_t *row;
+  
+  if (x < 0) firsti = abs(x);
+  else if (x + endi > WIDTH) endi = WIDTH;
+  if (y < 0) firstj = abs(y);
+  else if (y + endj > HEIGHT) endj = HEIGHT;
+
+  for (uint8_t j = firstj; j < endj; j++) {
+    *row = block[j];
+    for (uint8_t i = firsti; i < endi; i++) {
+      if (pgm_read_word_near(&(row[i])) == SKELETON) continue;
+      backScreen[y + j][x + i] = pgm_read_word_near(&(row[i]));
+    }
+  }
+  return;
+}
+
+void ATM0130::drawFlipBlock_4px(int16_t x, int16_t y, const uint16_t (&block)[4][4]) {
+  uint8_t firsti = 0, endi = 4;
+  uint8_t firstj = 0, endj = 4; //firsti,firstjを経由しないと下の二重ループがちゃんと機能しない。
+  if (x < 0) firsti = abs(x);
+  else if (x + endi > WIDTH) endi = WIDTH;
+  if (y < 0) firstj = abs(y);
+  else if (y + endj > HEIGHT) endj = HEIGHT;
+
+  for (uint8_t j = firstj; j < endj; j++) {
+    for (uint8_t i = firsti; i < endi; i++) {
+      if (pgm_read_word_near(&(block[j][i])) == SKELETON) continue;
+      backScreen[y + j][x + endi - 1 - i] = pgm_read_word_near(&(block[j][i]));
+    }
+  }
+  return;
+}
+
+void ATM0130::drawFlipBlock_8px(int16_t x, int16_t y, const uint16_t (&block)[8][8]) {
+  uint8_t firsti = 0, endi = 8;
+  uint8_t firstj = 0, endj = 8; //firsti,firstjを経由しないと下の二重ループがちゃんと機能しない。
+  if (x < 0) firsti = abs(x);
+  else if (x + endi > WIDTH) endi = WIDTH;
+  if (y < 0) firstj = abs(y);
+  else if (y + endj > HEIGHT) endj = HEIGHT;
+
+  for (uint8_t j = firstj; j < endj; j++) {
+    for (uint8_t i = firsti; i < endi; i++) {
+      if (pgm_read_word_near(&(block[j][i])) == SKELETON) continue;
+      backScreen[y + j][x + endi - 1 - i] = pgm_read_word_near(&(block[j][i]));
+    }
+  }
+  return;
+}
+
+void ATM0130::drawFlipBlock_16px(int16_t x, int16_t y, const uint16_t (&block)[16][16]) {
+  uint8_t firsti = 0, endi = 16;
+  uint8_t firstj = 0, endj = 16; //firsti,firstjを経由しないと下の二重ループがちゃんと機能しない。
+  if (x < 0) firsti = abs(x);
+  else if (x + endi > WIDTH) endi = WIDTH;
+  if (y < 0) firstj = abs(y);
+  else if (y + endj > HEIGHT) endj = HEIGHT;
+
+  for (uint8_t j = firstj; j < endj; j++) {
+    for (uint8_t i = firsti; i < endi; i++) {
+      if (pgm_read_word_near(&(block[j][i])) == SKELETON) continue;
+      backScreen[y + j][x + endi - 1 - i] = pgm_read_word_near(&(block[j][i]));
+    }
+  }
+  return;
+}
+
+void ATM0130::drawFlipBlock_32px(int16_t x, int16_t y, const uint16_t (&block)[32][32]) {
+  uint8_t firsti = 0, endi = 32;
+  uint8_t firstj = 0, endj = 32; //firsti,firstjを経由しないと下の二重ループがちゃんと機能しない。
+  if (x < 0) firsti = abs(x);
+  else if (x + endi > WIDTH) endi = WIDTH;
+  if (y < 0) firstj = abs(y);
+  else if (y + endj > HEIGHT) endj = HEIGHT;
+
+  for (uint8_t j = firstj; j < endj; j++) {
+    for (uint8_t i = firsti; i < endi; i++) {
+      if (pgm_read_word_near(&(block[j][i])) == SKELETON) continue;
+      backScreen[y + j][x + endi - 1 - i] = pgm_read_word_near(&(block[j][i]));
+    }
+  }
+  return;
+}
+
+void ATM0130::updateScreen() {
   uint8_t colorH;
   uint8_t colorL;
   SPI.beginTransaction(spi_settings);
   digitalWrite(SS, LOW);
-  setWindow(0, 0, WIDTH*2, HEIGHT*2);
+  setWindow(0, 0, WIDTH * 2, HEIGHT * 2);
 
   digitalWrite(dat_cmd, HIGH);
   for (uint8_t i = 0; i < HEIGHT; i++) {
     uint8_t j = 0;
-    for(j = 0; j < WIDTH; j++){
+    for (j = 0; j < WIDTH; j++) {
       colorH = backScreen[i][j] >> 8;
       colorL = backScreen[i][j] & 0x00FF;
       SPI.transfer(colorH);
@@ -387,7 +399,7 @@ void ATM0130::updateScreen(){
       SPI.transfer(colorH);
       SPI.transfer(colorL);
     }
-    for(j = 0; j < WIDTH; j++){
+    for (j = 0; j < WIDTH; j++) {
       colorH = backScreen[i][j] >> 8;
       colorL = backScreen[i][j] & 0x00FF;
       SPI.transfer(colorH);
@@ -398,37 +410,40 @@ void ATM0130::updateScreen(){
   }
   digitalWrite(SS, HIGH);
   SPI.endTransaction();
+
+  this->frame++;
 }
 
-void ATM0130::clearScreen(uint16_t color){
-  for(int i=0;i<WIDTH;i++){
-    for(int j=0;j<HEIGHT;j++){
-      backScreen[j][i] = color; 
+void ATM0130::clearScreen(uint16_t color) {
+  for (int i = 0; i < WIDTH; i++) {
+    for (int j = 0; j < HEIGHT; j++) {
+      backScreen[j][i] = color;
     }
   }
 }
 
-void ATM0130::drawDot(int16_t x, int16_t y, uint16_t color){
+void ATM0130::drawDot(int16_t x, int16_t y) {
+  if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) return;
   backScreen[y][x] = color;
 }
 
-void ATM0130::drawLine(int16_t x0, int16_t y0,int16_t x1, int16_t y1, uint16_t color){
+void ATM0130::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1) {
   uint8_t x, y, tmp;
   double slope = 0;
 
-  if(x0 <       0) x0 =          0;
-  if(y0 <       0) y0 =          0;
-  if(x0 >=  WIDTH) x0 = WIDTH  - 1;
-  if(y0 >= HEIGHT) y0 = HEIGHT - 1;
-  if(x1 <       0) x1 =          0;
-  if(y1 <       0) y1 =          0;
-  if(x1 >=  WIDTH) x1 = WIDTH  - 1;
-  if(y1 >= HEIGHT) y1 = HEIGHT - 1;
-  if(x0 == x1 && y0 == y1){
-    drawDot(x0,y0,color);
+  if (x0 <       0) x0 =          0;
+  if (y0 <       0) y0 =          0;
+  if (x0 >=  WIDTH) x0 = WIDTH  - 1;
+  if (y0 >= HEIGHT) y0 = HEIGHT - 1;
+  if (x1 <       0) x1 =          0;
+  if (y1 <       0) y1 =          0;
+  if (x1 >=  WIDTH) x1 = WIDTH  - 1;
+  if (y1 >= HEIGHT) y1 = HEIGHT - 1;
+  if (x0 == x1 && y0 == y1) {
+    drawDot(x0, y0);
     return;
   }
-  
+
   if (abs(x1 - x0) > abs(y1 - y0)) {
     if (x1 < x0) {                         // 座標値の入れ替え
       tmp = x0;
@@ -439,12 +454,12 @@ void ATM0130::drawLine(int16_t x0, int16_t y0,int16_t x1, int16_t y1, uint16_t c
       y1 = tmp;
     }
     slope = (double)(y1 - y0) / (x1 - x0); // 傾斜率の算出
-    for (int i=0; i<=(x1-x0); i++) {
+    for (int i = 0; i <= (x1 - x0); i++) {
       x = x0 + i;
       y = y0 + slope * i;
-      drawDot(x, y, color);
+      drawDot(x, y);
     }
-    } else {
+  } else {
     if (y1 < y0) {                         // 座標値の入れ替え
       tmp = x0;
       x0 = x1;
@@ -454,10 +469,140 @@ void ATM0130::drawLine(int16_t x0, int16_t y0,int16_t x1, int16_t y1, uint16_t c
       y1 = tmp;
     }
     slope = (double)(x1 - x0) / (y1 - y0); // 傾斜率の算出
-    for (int i=0; i<=(y1-y0); i++) {
+    for (int i = 0; i <= (y1 - y0); i++) {
       x = x0 + slope * i;
       y = y0 + i;
-      drawDot(x, y, color);
+      drawDot(x, y);
+    }
+  }
+}
+
+/*****四角形を描画する*****/
+void ATM0130::drawRectangle(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1) {
+  drawLine(x0, y0, x1, y0);
+  drawLine(x1, y0, x1, y1);
+  drawLine(x0, y0, x0, y1);
+  drawLine(x0, y1, x1, y1);
+}
+
+void ATM0130::drawFillRectangle(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1) {
+  for (uint8_t i = x0; i <= x1; i++) {
+    for (uint8_t j = y0; j <= y1; j++) {
+      backScreen[j][i] = color;
+    }
+  }
+}
+
+void ATM0130::drawCircle(uint8_t x0, uint8_t y0, uint8_t r) {
+  int16_t x;
+  int16_t y;
+  int16_t err;
+  int16_t old_err;
+
+  x = 0;
+  y = -r;
+  err = 2 - 2 * r;
+  do {
+    drawDot(x0 - x, y0 + y);
+    drawDot(x0 - y, y0 - x);
+    drawDot(x0 + x, y0 - y);
+    drawDot(x0 + y, y0 + x);
+    if ((old_err = err) <= x)   err += ++x * 2 + 1;
+    if (old_err > y || err > x) err += ++y * 2 + 1;
+  } while (y < 0);
+
+  return ;
+}
+
+void ATM0130::drawFillCircle(uint8_t x0, uint8_t y0, uint8_t r) {
+  int16_t x;
+  int16_t y;
+  int16_t dpy;
+  int16_t dmy;
+  int16_t err;
+  int16_t old_err;
+  bool ChangeX;
+
+  x = 0;
+  y = -r;
+  err = 2 - 2 * r;
+  ChangeX = true;
+  do {
+    if (ChangeX) {
+      if (y0 - y < 0) {
+        dmy = 0;
+      }
+      else dmy = y0 - y;
+      if (y0 + y < 0) {
+        dpy = 0;
+      }
+      else dpy = y0 + y;
+
+      drawLine(x0 - x, dmy, x0 - x, dpy);
+      drawLine(x0 + x, dmy, x0 + x, dpy);
+    } // if
+    ChangeX = (old_err = err) <= x;
+    if (ChangeX)            err += ++x * 2 + 1;
+    if (old_err > y || err > x) err += ++y * 2 + 1;
+  } while (y <= 0);
+
+  return;
+}
+
+void ATM0130::putStr(int16_t Xp, int16_t Yp, const char * s) {
+  int16_t x, y;
+
+  x = Xp ;
+  y = Yp ;
+  while (*s) {
+    if (*s == '\n') {
+      x = Xp;
+      y = y + 8;
+      *s++;
+    }
+    else if (*s == '\0') {
+      break;
+    }
+    else if (x + 4 > WIDTH) {
+      x = Xp;
+      y = y + 8;
+    }
+    putCharacter(x, y, *s++);
+    x = x + 6 ;  // 文字と文字の間は１ドットあける
+  }
+}
+
+void ATM0130::putStr(int16_t Xp, int16_t Yp, String str){
+  int16_t x, y;
+  char s[50];
+  str.toCharArray(s,50);
+
+  x = Xp ;
+  y = Yp ;
+  for(uint8_t num=0;num<50;num++) {
+    if (s[num] == '\n') {
+      x = Xp;
+      y = y + 8;
+      num++;
+    }
+    else if (s[num] == '\0') {
+      break;
+    }
+    else if (x + 4 > WIDTH) {
+      x = Xp;
+      y = y + 8;
+    }
+    putCharacter(x, y, s[num]);
+    x = x + 6 ;  // 文字と文字の間は１ドットあける
+  }
+}
+
+void ATM0130::putCharacter(int16_t x, int16_t y, char c) {
+  // 8x5の文字を描画する
+  if ((c < 0x20 || c > 0xDF) && c != 192) return;
+  for (uint8_t i = 0; i < 5; i++) {
+    for (uint8_t j = 0; j < 8; j++) {
+      if((pgm_read_byte_near(&(font[c - 0x20][i])) >> j) & 0b1 == 0b1) backScreen[y + j][x + i] = color;
     }
   }
 }
