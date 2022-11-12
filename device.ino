@@ -61,6 +61,11 @@ void handleRootPost() {
   Serial.println("getPASS: " + getpass);
   
 
+  myATM0130.clearScreen(BLACK16);
+  myATM0130.setColor(GREEN16);
+  myATM0130.putStr(0,00,"setting changed\0");
+  myATM0130.updateScreen();
+  
   String html = "";
   html += "<h1>WiFi Settings</h1>";
   html += getssid + "<br>";
@@ -177,5 +182,6 @@ bool Device::readSettings(){
   ssid.trim();
   pass.trim();
   
+  WiFiBegin();
   return true;
 }

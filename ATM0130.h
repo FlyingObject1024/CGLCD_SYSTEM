@@ -31,7 +31,6 @@ class ATM0130 {
     ATM0130(uint8_t pin_dat_cmd, uint8_t pin_reset);
     void begin(void);
 
-
     void clearScreen(uint16_t color);
     void updateScreen();
 
@@ -40,11 +39,12 @@ class ATM0130 {
     void drawBlock_16px(int16_t x, int16_t y, const uint16_t (&block)[16][16]);
     void drawBlock_16px(int16_t x, int16_t y, const uint16_t (&block)[16][16], uint8_t cut_left, uint8_t cut_right, uint8_t cut_top, uint8_t cut_bottom);
     void drawBlock_32px(int16_t x, int16_t y, const uint16_t (&block)[32][32]);
-    void drawBlock(int16_t x, int16_t y, uint8_t sizex, uint8_t sizey, uint16_t (*block));
+    void drawBlock(int16_t x, int16_t y, uint8_t imagex, uint8_t imagey, uint8_t sizex, uint8_t sizey, const uint16_t (&block)[120][120]);
     void drawFlipBlock_4px(int16_t x, int16_t y, const uint16_t (&block)[4][4]);
     void drawFlipBlock_8px(int16_t x, int16_t y, const uint16_t (&block)[8][8]);
     void drawFlipBlock_16px(int16_t x, int16_t y, const uint16_t (&block)[16][16]);
     void drawFlipBlock_32px(int16_t x, int16_t y, const uint16_t (&block)[32][32]);
+    void drawFlipBlock(int16_t x, int16_t y, uint8_t imagex, uint8_t imagey, uint8_t sizex, uint8_t sizey, const uint16_t (&block)[120][120]);
 
     void setColor(uint16_t c);
     void drawDot(int16_t x, int16_t y);

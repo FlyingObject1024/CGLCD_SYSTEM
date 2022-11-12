@@ -85,7 +85,8 @@ void UI::drawClock(int16_t x, int16_t y) {
 
   //短針
   myATM0130.setColor(RED16);
-  Rad = (360 * ((device.getHour() % 12) / 12.0) - 90) / (180 / PI);
+  //Rad = (360 * ((device.getHour() % 12) / 12.0) - 90) / (180 / PI);
+  Rad = (360 * ((( (device.getHour()%12)*5 + device.getMinute()/12 ) % 60) / 60.0) - 90) / (180 / PI);
   myATM0130.drawLine(x  , y  , x + cos(Rad) * 5, y + sin(Rad) * 5);
   myATM0130.drawLine(x - 1, y  , x + cos(Rad) * 5, y + sin(Rad) * 5);
   myATM0130.drawLine(x + 1, y  , x + cos(Rad) * 5, y + sin(Rad) * 5);
@@ -133,19 +134,36 @@ void UI::drawSetting() {
   myATM0130.putStr(0,25,"PASS:\0");
   myATM0130.putStr(0,33,device.getServerpass());
   myATM0130.setColor(WHITE16);
-  myATM0130.putStr(0,49,"URL:\nhttp://192.168.4.1/\0");
+  myATM0130.putStr(0,49,"and search URL:\nhttp://192.168.4.1/\0");
+  myATM0130.setColor(RED16);
+  myATM0130.putStr(0,73,"EXIT:\n PRESS LEFT BUTTON\0");
+  this->menuOpen = false;
 }
 
 void UI::draw() {
-  myATM0130.drawBlock(30, 70, 16, 16, icon[ICON_HAND]);
   if (this->menuOpen) {
     if      (this->UIcursor == ICON_HAND   ) ;
     else if (this->UIcursor == ICON_FOOD   ) ;
     else if (this->UIcursor == ICON_INFO   ) this->drawInfo();
     else if (this->UIcursor == ICON_SAVE   ) this->drawSave();
-    else if (this->UIcursor == ICON_SLEEP  ) ;
+    else if (this->UIcursor == ICON_POWER  ) ;
     else if (this->UIcursor == ICON_SETTING) this->drawSetting();
-    else ;
+    else{
+      //debug
+      Serial.print("\nFrame: ");
+      Serial.print(myATM0130.frame);
+      Serial.print(",loop: "); 
+      Serial.println(character.loopTime);
+      Serial.print("Life: ");
+      Serial.print(character.life);
+      Serial.print(",Stomach: ");
+      Serial.print(character.stomach);
+      Serial.print(",Favorability: ");
+      Serial.print(character.favorability);
+      Serial.print(",HiddenF: ");
+      Serial.print(character.hiddenFavorability);
+      //debugMenuEnd
+    }
   }
   else {
     if(device.isServerStarted){

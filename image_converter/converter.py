@@ -2,10 +2,15 @@ import os
 import cv2
 import numpy as np
 from moviepy.editor import ImageSequenceClip
+from tkinter import filedialog
 
 np.set_printoptions(threshold=np.inf)
 
-filepath = "./noah_eye.gif"
+filepath = filedialog.askopenfilename(
+    title = "画像ファイルを開く",
+    filetypes = [("gif file", ".gif")], # ファイルフィルタ
+    initialdir = "./" # 自分自身のディレクトリ
+    )
 
 gif = cv2.VideoCapture(filepath)
 fps = gif.get(cv2.CAP_PROP_FPS)  # fpsは１秒あたりのコマ数
@@ -36,8 +41,10 @@ else:
     f.write('const uint16_t '+ os.path.splitext(os.path.basename(filepath))[0] +'['+str(len(images[0]))+']['+str(len(images[0][0]))+'] PROGMEM = {\n')
 
 for t in range(len(images)):
+
+    if(len(images) > 1):
+        f.write('{\n')
         
-    f.write('{\n')
     for i in range(len(images[t])):
         f.write('    {')
         for j in range(len(images[t][i])):
@@ -48,8 +55,9 @@ for t in range(len(images)):
             f.write('{:#06x}, '.format(color))
     
         f.write('},\n')
-    
-    f.write('},\n')
+
+    if(len(images) > 1):
+        f.write('},\n')
 
 f.write('};\n')
 

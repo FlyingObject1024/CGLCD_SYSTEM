@@ -26,7 +26,6 @@ void checker() {
     Serial.println(device.last_millis);
   }
   buttonChecker();
-  wifiChecker();
 }
 
 void buttonChecker() {
@@ -38,16 +37,6 @@ void buttonChecker() {
     button_reader |= (1 << BUTTON_B);
   }
   device.setButtonState(button_reader);
-}
-
-void wifiChecker(){
-  if(myATM0130.frame % 100 >= 0 && device.tryWiFiConnect){
-    device.WiFiConnectCheck();
-    if(device.isTimeConfigured) device.WiFiEnd();
-  }
-  if(device.isServerStarted){
-    device.serverWaitAccess();
-  }
 }
 
 // 割り込み処理
@@ -70,7 +59,7 @@ void setup() {
   Serial.println("\nSYSTEM START");
 
   myATM0130.begin();
-  
+
   device.WiFiBegin();
 
   gameobjects[0] = &background;
@@ -82,11 +71,24 @@ void setup() {
 void loop() {
   checker();
 
-  for (uint8_t i = 0; gameobjects[i] != NULL; i++) {
-    gameobjects[i]->move();
-    if (gameobjects[i]->show) gameobjects[i]->draw();
+  if (myATM0130.frame % 100 >= 0 && device.tryWiFiConnect) {
+    device.WiFiConnectCheck();
+    if (device.isTimeConfigured) device.WiFiEnd();
   }
-  myATM0130.updateScreen();
+  
+  if (device.isServerStarted) {
+    device.serverWaitAccess();
+    if (device.getButtonState(BUTTON_A, BUTTON_PRESSED)){
+      device.serverEnd();
+    }
+  }
+  else {
+    for (uint8_t i = 0; gameobjects[i] != NULL; i++) {
+      gameobjects[i]->move();
+      if (gameobjects[i]->show) gameobjects[i]->draw();
+    }
+    myATM0130.updateScreen();
+  }
 
   yield();
 }

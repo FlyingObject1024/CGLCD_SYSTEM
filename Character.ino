@@ -9,19 +9,46 @@ Character::Character() {
   this->life = 50;
   this->stomach = 50;
   this->favorability = 50;
-  this->hiddenfavorability = 50;
+  this->hiddenFavorability = 50;
 
   this->loopTime = 10;
 
+  this->action = 0;
+  this->actionAnimationNum = 0;
+
   this->eyeState = 0;
   this->bodyState = 0;
-  this->flip = false;
+  this->flip = false;  
+}
 
-
-  
+void Character::statusChanger(){
+  if(this->stomach > 0){
+    if(this->stomach >= 90){
+      this->life++;
+      this->favorability++;
+      if(this->favorability >= 95 && this->life >= 80) this->hiddenFavorability++;
+    }
+    this->stomach--;
+    this->favorability--;
+  }
+  else{
+    this->life--;
+    this->favorability -= 2;
+  }
+  if(this->favorability <= 10){
+    this->hiddenFavorability--;
+    if(this->hiddenFavorability) this->hiddenFavorability = 0;
+  }
 }
 
 void Character::move() {
+  if(myATM0130.frame % 10 == 0){
+    this->loopTime--;
+    if(this->loopTime == 0){
+      statusChanger();
+      this->loopTime = 10;
+    }
+  }
   if (micros() % 100 <= 10) {
     this->x += micros() % 11 - 5;
     this->y += micros() % 11 - 5;

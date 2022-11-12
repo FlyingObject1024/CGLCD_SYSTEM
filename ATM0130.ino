@@ -292,22 +292,20 @@ void ATM0130::drawBlock_32px(int16_t x, int16_t y, const uint16_t (&block)[32][3
   return;
 }
 
-void ATM0130::drawBlock(int16_t x, int16_t y, uint8_t sizex, uint8_t sizey, uint16_t (*block)) {
+
+void ATM0130::drawBlock(int16_t x, int16_t y, uint8_t imagex, uint8_t imagey, uint8_t sizex, uint8_t sizey, const uint16_t (&block)[120][120]) {
   uint8_t firsti = 0, endi = sizex;
   uint8_t firstj = 0, endj = sizey;
-
-  uint16_t *row;
   
-  if (x < 0) firsti = abs(x);
-  else if (x + endi > WIDTH) endi = WIDTH;
-  if (y < 0) firstj = abs(y);
-  else if (y + endj > HEIGHT) endj = HEIGHT;
+  if (x < 0) firsti -= x;
+  else if (x + endi >= WIDTH) endi = WIDTH - 1;
+  if (y < 0) firstj -= y;
+  else if (y + endj >= HEIGHT) endj = HEIGHT - 1;
 
-  for (uint8_t j = firstj; j < endj; j++) {
-    *row = block[j];
-    for (uint8_t i = firsti; i < endi; i++) {
-      if (pgm_read_word_near(&(row[i])) == SKELETON) continue;
-      backScreen[y + j][x + i] = pgm_read_word_near(&(row[i]));
+  for (uint16_t j = firstj; j < endj; j++) {
+    for (uint16_t i = firsti; i < endi; i++) {
+      if (pgm_read_word_near(&(block[imagey + j][imagex + i])) == SKELETON || x+i < 0 || x+i >= WIDTH) continue;
+      backScreen[y + j][x + i] = pgm_read_word_near(&(block[imagey + j][imagex + i]));
     }
   }
   return;
@@ -376,6 +374,25 @@ void ATM0130::drawFlipBlock_32px(int16_t x, int16_t y, const uint16_t (&block)[3
     for (uint8_t i = firsti; i < endi; i++) {
       if (pgm_read_word_near(&(block[j][i])) == SKELETON) continue;
       backScreen[y + j][x + endi - 1 - i] = pgm_read_word_near(&(block[j][i]));
+    }
+  }
+  return;
+}
+
+void ATM0130::drawFlipBlock(int16_t x, int16_t y, uint8_t imagex, uint8_t imagey, uint8_t sizex, uint8_t sizey, const uint16_t (&block)[120][120]) {
+  uint8_t firsti = 0, endi = sizex;
+  uint8_t firstj = 0, endj = sizey;
+
+  
+  if (x < 0) firsti = abs(x);
+  else if (x + endi > WIDTH) endi = WIDTH;
+  if (y < 0) firstj = abs(y);
+  else if (y + endj > HEIGHT) endj = HEIGHT;
+
+  for (uint16_t j = firstj; j < endj; j++) {
+    for (uint16_t i = firsti; i < endi; i++) {
+      if (pgm_read_word_near(&(block[imagey + j][imagex + i])) == SKELETON) continue;
+      backScreen[y + j][x + endi - 1 - i] = pgm_read_word_near(&(block[imagey + j][imagex + i]));
     }
   }
   return;
