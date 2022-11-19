@@ -19,12 +19,14 @@
 #include "device.h"
 #include "image.h"
 #include "font.h"
+#include "etcdata.h"
 #include "GameObject.h"
 
 #define WIDTH 120
 #define HEIGHT 120
 
 #define PI 3.141592653589793
+#define FLIP true
 
 class ATM0130 {
   public:
@@ -33,6 +35,7 @@ class ATM0130 {
 
     void clearScreen(uint16_t color);
     void updateScreen();
+
 
     void drawBlock_4px(int16_t x, int16_t y, const uint16_t (&block)[4][4]);
     void drawBlock_8px(int16_t x, int16_t y, const uint16_t (&block)[8][8]);
@@ -45,6 +48,17 @@ class ATM0130 {
     void drawFlipBlock_16px(int16_t x, int16_t y, const uint16_t (&block)[16][16]);
     void drawFlipBlock_32px(int16_t x, int16_t y, const uint16_t (&block)[32][32]);
     void drawFlipBlock(int16_t x, int16_t y, uint8_t imagex, uint8_t imagey, uint8_t sizex, uint8_t sizey, const uint16_t (&block)[120][120]);
+    
+    void drawBlock_4px(int16_t x, int16_t y, const uint16_t (&block)[4][4],bool flip);
+    void drawBlock_8px(int16_t x, int16_t y, const uint16_t (&block)[8][8],bool flip);
+    void drawBlock_16px(int16_t x, int16_t y, const uint16_t (&block)[16][16],bool flip);
+    void drawBlock_32px(int16_t x, int16_t y, const uint16_t (&block)[32][32],bool flip);
+    
+    void drawRotateBlock_4px(int16_t x, int16_t y, const uint16_t (&block)[4][4]);
+    void drawRotateFlipBlock_4px(int16_t x, int16_t y, const uint16_t (&block)[4][4]);
+    
+    void drawRotateBlock_16px(int16_t x, int16_t y, const uint16_t (&block)[16][16]);
+    void drawRotateFlipBlock_16px(int16_t x, int16_t y, const uint16_t (&block)[16][16]);
 
     void setColor(uint16_t c);
     void drawDot(int16_t x, int16_t y);

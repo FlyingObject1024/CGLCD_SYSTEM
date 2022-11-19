@@ -126,7 +126,8 @@ void BackGround::draw() {
   //ちゃぶ台
   myATM0130.drawBlock(17, 58, 32,  0, 24, 16, imagemap);
   //布団
-  myATM0130.drawBlock(70, 55,  0,  0, 32, 16, imagemap);
+  if(!(character.bodyState == BODY_SLEEP0 || character.bodyState == BODY_SLEEP1))
+    myATM0130.drawBlock(70, 55,  0,  0, 32, 16, imagemap);
   //冷蔵庫
   myATM0130.drawBlock( 6, 72, 32, 16, 16, 24, imagemap);
 }

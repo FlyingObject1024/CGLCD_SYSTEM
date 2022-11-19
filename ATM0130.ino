@@ -398,6 +398,94 @@ void ATM0130::drawFlipBlock(int16_t x, int16_t y, uint8_t imagex, uint8_t imagey
   return;
 }
 
+void ATM0130::drawRotateBlock_4px(int16_t x, int16_t y, const uint16_t (&block)[4][4]){
+  uint8_t firsti = 0, endi = 4;
+  uint8_t firstj = 0, endj = 4; //firsti,firstjを経由しないと下の二重ループがちゃんと機能しない。
+  if (x < 0) firsti = abs(x);
+  else if (x + endi > WIDTH) endi = WIDTH;
+  if (y < 0) firstj = abs(y);
+  else if (y + endj > HEIGHT) endj = HEIGHT;
+
+  for (uint8_t j = firstj; j < endj; j++) {
+    for (uint8_t i = firsti; i < endi; i++) {
+      if (pgm_read_word_near(&(block[j][i])) == SKELETON) continue;
+      backScreen[y + i][x + j] = pgm_read_word_near(&(block[j][i]));
+    }
+  }
+  return;
+}
+
+void ATM0130::drawRotateFlipBlock_4px(int16_t x, int16_t y, const uint16_t (&block)[4][4]){
+  uint8_t firsti = 0, endi = 4;
+  uint8_t firstj = 0, endj = 4; //firsti,firstjを経由しないと下の二重ループがちゃんと機能しない。
+  if (x < 0) firsti = abs(x);
+  else if (x + endi > WIDTH) endi = WIDTH;
+  if (y < 0) firstj = abs(y);
+  else if (y + endj > HEIGHT) endj = HEIGHT;
+
+  for (uint8_t j = firstj; j < endj; j++) {
+    for (uint8_t i = firsti; i < endi; i++) {
+      if (pgm_read_word_near(&(block[j][i])) == SKELETON) continue;
+      backScreen[y + i][x + endj - 1 - j] = pgm_read_word_near(&(block[j][i]));
+    }
+  }
+  return;
+}
+
+void ATM0130::drawRotateBlock_16px(int16_t x, int16_t y, const uint16_t (&block)[16][16]){
+  uint8_t firsti = 0, endi = 16;
+  uint8_t firstj = 0, endj = 16; //firsti,firstjを経由しないと下の二重ループがちゃんと機能しない。
+  if (x < 0) firsti = abs(x);
+  else if (x + endi > WIDTH) endi = WIDTH;
+  if (y < 0) firstj = abs(y);
+  else if (y + endj > HEIGHT) endj = HEIGHT;
+
+  for (uint8_t j = firstj; j < endj; j++) {
+    for (uint8_t i = firsti; i < endi; i++) {
+      if (pgm_read_word_near(&(block[j][i])) == SKELETON) continue;
+      backScreen[y + i][x + j] = pgm_read_word_near(&(block[j][i]));
+    }
+  }
+  return;
+}
+
+void ATM0130::drawRotateFlipBlock_16px(int16_t x, int16_t y, const uint16_t (&block)[16][16]){
+  uint8_t firsti = 0, endi = 16;
+  uint8_t firstj = 0, endj = 16; //firsti,firstjを経由しないと下の二重ループがちゃんと機能しない。
+  if (x < 0) firsti = abs(x);
+  else if (x + endi > WIDTH) endi = WIDTH;
+  if (y < 0) firstj = abs(y);
+  else if (y + endj > HEIGHT) endj = HEIGHT;
+
+  for (uint8_t j = firstj; j < endj; j++) {
+    for (uint8_t i = firsti; i < endi; i++) {
+      if (pgm_read_word_near(&(block[j][i])) == SKELETON) continue;
+      backScreen[y + i][x + endj - 1 - j] = pgm_read_word_near(&(block[j][i]));
+    }
+  }
+  return;
+}
+
+void ATM0130::drawBlock_4px(int16_t x, int16_t y, const uint16_t (&block)[4][4],bool flip) {
+  if(flip) drawFlipBlock_4px(x,y,block);
+  else     drawBlock_4px(x,y,block);    
+}
+
+void ATM0130::drawBlock_8px(int16_t x, int16_t y, const uint16_t (&block)[8][8],bool flip) {
+  if(flip) drawFlipBlock_8px(x,y,block);
+  else     drawBlock_8px(x,y,block);    
+}
+
+void ATM0130::drawBlock_16px(int16_t x, int16_t y, const uint16_t (&block)[16][16],bool flip) {
+  if(flip) drawFlipBlock_16px(x,y,block);
+  else     drawBlock_16px(x,y,block);    
+}
+
+void ATM0130::drawBlock_32px(int16_t x, int16_t y, const uint16_t (&block)[32][32],bool flip) {
+  if(flip) drawFlipBlock_32px(x,y,block);
+  else     drawBlock_32px(x,y,block);    
+}
+
 void ATM0130::updateScreen() {
   uint8_t colorH;
   uint8_t colorL;

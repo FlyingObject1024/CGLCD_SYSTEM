@@ -1,0 +1,40 @@
+#ifndef ETCDATA_H_
+#define ETCDATA_H_
+
+#include "image.h"
+
+enum{
+  ACTION_NORMAL,
+  ACTION_DANCE,
+  ACTION_CRY,
+  ACTION_SLEEP,
+  ACTION_SIT,
+  ACTION_LIE,
+  ACTION_STROKE,
+  ACTION_WOW,
+  ACTION_DIE,
+};
+/*
+enum{
+  BODY_SAMPLE,BODY_NORMAL0,BODY_NORMAL1,BODY_WOW,
+  BODY_HEY,BODY_THAT,BODY_BACK,BODY_SIT,BODY_LIE,BODY_SLEEP0,BODY_SLEEP1,
+  BODY_DIE,BODY_WHAT,BODY_TYOKON,BODY_MOJI0,BODY_MOJI1,BODY_IMAGENUM
+};
+enum{
+  EYE_NORMAL,EYE_SLEEPY0,EYE_SLEEPY1,EYE_CLOSE,EYE_HAPPY,EYE_SURPRISE,
+  EYE_ZITO,EYE_HOW,EYE_WINK,EYE_HIDE
+};*/
+
+const uint8_t action_normal[2][2] = {
+    {BODY_NORMAL0,EYE_NORMAL},
+    {NULL,NULL},
+};
+
+const uint8_t action_normalt[2][2] = {
+    {BODY_NORMAL0,EYE_NORMAL},
+    {NULL,NULL},
+};
+
+const uint8_t act = { action_normal,action_normalt };
+
+#endif

@@ -185,3 +185,42 @@ bool Device::readSettings(){
   WiFiBegin();
   return true;
 }
+
+bool Device::save(uint8_t life, uint8_t stomach, int8_t favorability, int8_t hiddenFavorability){  
+  SPIFFS.begin();
+  File f = SPIFFS.open("/character_data","w");
+  if(f == NULL) return false;
+  f.println(life);
+  f.println(stomach);
+  f.println(favorability);
+  f.println(hiddenFavorability);
+  f.close();
+  SPIFFS.end();
+}
+
+void Device::sleep(){
+  digitalWrite(LED_PIN,LOW);  
+}
+
+void Device::timeLog(){
+  String timelog = String(tm->tm_year+1900) +"/"+ String(tm->tm_mon+1) + "/" + String(tm->tm_mday) + " " + String(tm->tm_hour) + ":" + String(tm->tm_min) + ":" + String(tm->tm_sec);
+  Serial.println(timelog);
+
+  SPIFFS.begin();
+  File f = SPIFFS.open("/time_log.txt", "w");
+  f.println(timelog);
+  f.close();
+  SPIFFS.end();
+}
+
+void Device::readTimeLog(){
+  String timelog;
+  SPIFFS.begin();
+  File f = SPIFFS.open("/time_log.txt","r");
+  if(f == NULL) return;
+  
+  timelog = f.readStringUntil('\n');
+  f.close();
+  SPIFFS.end();
+  Serial.println("Last Timelog: " + timelog);
+}

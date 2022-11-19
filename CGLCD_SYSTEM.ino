@@ -9,11 +9,15 @@
    ->駆動50,000,000ms続行
 */
 
+//2022/11/15 2:00 電源耐久試験開始 sleepなし、単三乾電池2本(3.0V)による試験 wifi接続は時間受信最初の1回のみ
+// 2022/11/15 11:20:31 最終ログ
+//液晶が先に見えなくなる。液晶の電源制御は必須。
+//そもそも電圧が3.0Vでは不十分だと思われる。
+
+//deep sleep関連クロックの保持->　https://www.robmiles.com/journal/2020/1/22/esp32-retaining-timing-over-deep-sleep
+
+
 #include "ATM0130.h"
-GameObject* gameobjects[4];
-BackGround background;
-Character character;
-UI userinterface;
 
 bool button_press_flag = false;
 
@@ -24,6 +28,10 @@ void checker() {
     device.last_millis = millis();
     Serial.print("executeTime: ");
     Serial.println(device.last_millis);
+    if(device.isTimeConfigured) device.timeLog();
+    else device.readTimeLog();
+    int v = ESP.getVcc();
+    Serial.println("VCC="+String(v/1000.0)+"V");
   }
   buttonChecker();
 }
@@ -48,6 +56,7 @@ void IRAM_ATTR button_pushed() {
 
 
 void setup() {
+  pinMode(LED_PIN, OUTPUT);
   pinMode(BUTTON_A_PIN, INPUT_PULLUP);
   pinMode(BUTTON_B_PIN, INPUT_PULLUP);
 
@@ -57,6 +66,8 @@ void setup() {
 
   Serial.begin(115200);
   Serial.println("\nSYSTEM START");
+  
+  digitalWrite(LED_PIN,HIGH);
 
   myATM0130.begin();
 
@@ -70,8 +81,7 @@ void setup() {
 
 void loop() {
   checker();
-
-  if (myATM0130.frame % 100 >= 0 && device.tryWiFiConnect) {
+  if (device.tryWiFiConnect) {
     device.WiFiConnectCheck();
     if (device.isTimeConfigured) device.WiFiEnd();
   }

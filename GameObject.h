@@ -2,11 +2,6 @@
 #ifndef GAMEOBJECT_H_
 #define GAMEOBJECT_H_
 
-enum{
-  ACTION_NORMAL,
-  ACTION_
-};
-
 class GameObject{
   public:
     bool show;
@@ -48,9 +43,9 @@ class Character : public GameObject{
     uint8_t life;//体力 0になると倒れる(不可逆)
     uint8_t stomach;//空腹度
     
-    int8_t favorability;//表出好感度
-    int8_t hiddenFavorability;//真の好感度
-    //favorability = 100*hiddenfavorability/(time+hiddenFavorability)
+    int8_t happiness;//楽しさ
+    int8_t favorability;//好感度
+    //happiness = 100*favorability/(time+favorability)
 
     
     uint8_t loopTime;//パラメータ変動時間0になったら変動
@@ -59,6 +54,8 @@ class Character : public GameObject{
     Character();
     void move();
     void draw();
+
+    void changeState();
 
     uint8_t action;
     uint8_t actionAnimationNum;
@@ -75,7 +72,16 @@ class UI : public GameObject{
     int8_t UIcursor;
     int8_t secondCursor;
 
+
+    void moveTouch();
+    void moveEat();
+    void moveSave();
+    void moveSetting();
+    
     void drawMenubar();
+    
+    void drawTouch();
+    void drawEat();
     void drawInfo();
     void drawSave();
     void drawSetting();
@@ -88,5 +94,10 @@ class UI : public GameObject{
     void drawClock(int16_t x,int16_t y);
     
 };
+
+GameObject* gameobjects[4];
+BackGround background;
+Character character;
+UI userinterface;
 
 #endif

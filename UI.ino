@@ -12,6 +12,25 @@ UI::UI() {
   this->secondCursor = 0;
 }
 
+void UI::moveTouch(){
+  
+}
+void UI::moveEat(){
+  
+}
+void UI::moveSave(){
+  /*device.save(
+    &character.life,
+    &character.stomach,
+    &character.favorability,
+    &character.hiddenFavorability
+    );*/
+}
+
+void UI::moveSetting(){
+  
+}
+
 void UI::move() {
   if (device.getButtonState(BUTTON_A, BUTTON_PRESSED)) {
     if (!this->menuOpen) this->menuOpen = true;
@@ -55,6 +74,11 @@ void UI::drawMenubar() {
   }
 
   this->drawClock(106, 106);
+}
+
+
+void UI::drawTouch(){
+  
 }
 
 void UI::drawClock(int16_t x, int16_t y) {
@@ -102,24 +126,24 @@ void UI::drawClock(int16_t x, int16_t y) {
 
 void UI::drawInfo() {
   myATM0130.setColor(WHITE16);
-  myATM0130.drawFillRectangle(1, 60, 118, 119);
-  myATM0130.drawLine(0, 60, 0, 120);
-  myATM0130.drawLine(119, 60, 119, 120);
+  myATM0130.drawFillRectangle(1, 80, 118, 119);
+  myATM0130.drawLine(0, 80, 0, 120);
+  myATM0130.drawLine(119, 80, 119, 120);
   myATM0130.setColor(BLACK16);
-  myATM0130.drawLine(1, 59, 118, 59);
-  myATM0130.drawDot(0, 60);
-  myATM0130.drawDot(119, 60);
+  myATM0130.drawLine(1, 79, 118, 79);
+  myATM0130.drawDot(0, 80);
+  myATM0130.drawDot(119, 80);
 
-  myATM0130.drawBlock_32px(1, 61, character_image[0]);
+  myATM0130.drawBlock_32px(1, 81, character_image[0]);
 
-  myATM0130.drawBlock_16px(34, 61, icon[ICON_GRAYHEART]);
-  myATM0130.drawBlock_16px(34, 61, icon[ICON_HEART], (uint8_t)(16 - 16.0 * (((double)character.favorability) / 100.0)), 0, 0, 0);
-  myATM0130.drawBlock_16px(34, 77, icon[ICON_GRAYSTMACH]);
-  myATM0130.drawBlock_16px(34, 77, icon[ICON_STMACH], (uint8_t)(16 - 16.0 * (((double)character.stomach) / 100.0)), 0, 0, 0);
+  myATM0130.drawBlock_16px(34, 81, icon[ICON_GRAYMUSICNOTE]);
+  myATM0130.drawBlock_16px(34, 81, icon[ICON_MUSICNOTE], (uint8_t)(16 - 16.0 * (((double)character.favorability) / 100.0)), 0, 0, 0);
+  myATM0130.drawBlock_16px(34, 97, icon[ICON_GRAYSTMACH]);
+  myATM0130.drawBlock_16px(34, 97, icon[ICON_STMACH], (uint8_t)(16 - 16.0 * (((double)character.stomach) / 100.0)), 0, 0, 0);
 }
 
 void UI::drawSave() {
-
+  //moveSave();
 }
 
 void UI::drawSetting() {
@@ -142,7 +166,7 @@ void UI::drawSetting() {
 
 void UI::draw() {
   if (this->menuOpen) {
-    if      (this->UIcursor == ICON_HAND   ) ;
+    if      (this->UIcursor == ICON_HAND   ) this->drawTouch();
     else if (this->UIcursor == ICON_FOOD   ) ;
     else if (this->UIcursor == ICON_INFO   ) this->drawInfo();
     else if (this->UIcursor == ICON_SAVE   ) this->drawSave();
@@ -158,10 +182,10 @@ void UI::draw() {
       Serial.print(character.life);
       Serial.print(",Stomach: ");
       Serial.print(character.stomach);
+      Serial.print(",Happiness: ");
+      Serial.print(character.happiness);
       Serial.print(",Favorability: ");
       Serial.print(character.favorability);
-      Serial.print(",HiddenF: ");
-      Serial.print(character.hiddenFavorability);
       //debugMenuEnd
     }
   }
