@@ -34,6 +34,22 @@ void checker() {
     Serial.println("VCC="+String(v/1000.0)+"V");
   }
   buttonChecker();
+  uint8_t i=0;
+  while(1){
+    if(pgm_read_byte(&(act[0][i])) == NULL) break;
+    Serial.print(pgm_read_byte(&(act[0][i])));
+    Serial.print(" ");
+    Serial.println(pgm_read_byte(&(act[0][i+1])));
+    i += 2;
+  }
+  i=0;
+  while(1){
+    if(pgm_read_byte(&(act[1][i])) == NULL) break;
+    Serial.print(pgm_read_byte(&(act[1][i])));
+    Serial.print(" ");
+    Serial.println(pgm_read_byte(&(act[1][i+1])));
+    i += 2;
+  }
 }
 
 void buttonChecker() {

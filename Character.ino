@@ -89,6 +89,9 @@ void Character::drawEye() {
   }
   else if (this->bodyState == BODY_SLEEP0
            || this->bodyState == BODY_SLEEP1) {
+    this->x = 70;
+    this->y = 55;
+    this->flip = false;
     if (this->flip) {
       myATM0130.drawRotateBlock_4px(x + 6, y + 21, character_eye[this->eyeState * 2]);
       myATM0130.drawRotateBlock_4px(x + 6, y + 27, character_eye[this->eyeState * 2 + 1]);

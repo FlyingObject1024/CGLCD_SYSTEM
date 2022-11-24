@@ -29,7 +29,8 @@ enum{
   BODY_TYOKON,
   BODY_MOJI0,
   BODY_MOJI1,
-  BODY_IMAGENUM
+  BODY_IMAGENUM,
+  FLIP
 };
 
 enum{
