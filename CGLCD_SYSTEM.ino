@@ -15,12 +15,26 @@
 //そもそも電圧が3.0Vでは不十分だと思われる。
 
 //deep sleep関連クロックの保持->　https://www.robmiles.com/journal/2020/1/22/esp32-retaining-timing-over-deep-sleep
-
+//NULLの値は0になるため、配列の終止として使用してはならない。
 
 #include "ATM0130.h"
 
 bool button_press_flag = false;
 
+void animationChecker(){
+  for (uint8_t i = 0; i < ANIME_NUM; i++) {
+    Serial.printf("anime: %d\n",i);
+    uint8_t* a = (uint8_t*)animations[i];
+    for (uint8_t j = 0; pgm_read_byte(&(*a)) != ARRAYSTOPPER; j++) {
+      Serial.print(pgm_read_byte(&(*a)));
+      Serial.print(",");
+      Serial.println(pgm_read_byte(&(*(a+1))));
+      a+=2;
+      if(pgm_read_byte(&(*a)) == ARRAYSTOPPER) break;
+      else if(pgm_read_byte(&(*(a+1))) == ARRAYSTOPPER) break;
+    }
+  }
+}
 
 void checker() {
   //運用情報のチェック
@@ -28,28 +42,13 @@ void checker() {
     device.last_millis = millis();
     Serial.print("executeTime: ");
     Serial.println(device.last_millis);
-    if(device.isTimeConfigured) device.timeLog();
+    if (device.isTimeConfigured) device.timeLog();
     else device.readTimeLog();
     int v = ESP.getVcc();
-    Serial.println("VCC="+String(v/1000.0)+"V");
+    Serial.println("VCC=" + String(v / 1000.0) + "V");
   }
   buttonChecker();
-  uint8_t i=0;
-  while(1){
-    if(pgm_read_byte(&(act[0][i])) == NULL) break;
-    Serial.print(pgm_read_byte(&(act[0][i])));
-    Serial.print(" ");
-    Serial.println(pgm_read_byte(&(act[0][i+1])));
-    i += 2;
-  }
-  i=0;
-  while(1){
-    if(pgm_read_byte(&(act[1][i])) == NULL) break;
-    Serial.print(pgm_read_byte(&(act[1][i])));
-    Serial.print(" ");
-    Serial.println(pgm_read_byte(&(act[1][i+1])));
-    i += 2;
-  }
+  //animationChecker();
 }
 
 void buttonChecker() {
@@ -82,8 +81,8 @@ void setup() {
 
   Serial.begin(115200);
   Serial.println("\nSYSTEM START");
-  
-  digitalWrite(LED_PIN,HIGH);
+
+  digitalWrite(LED_PIN, HIGH);
 
   myATM0130.begin();
 
@@ -98,19 +97,23 @@ void setup() {
 void loop() {
   checker();
   if (device.tryWiFiConnect) {
+    //Serial.println("tryWiFi");
     device.WiFiConnectCheck();
     if (device.isTimeConfigured) device.WiFiEnd();
   }
-  
+
   if (device.isServerStarted) {
+    //Serial.println("tryServer");
     device.serverWaitAccess();
-    if (device.getButtonState(BUTTON_A, BUTTON_PRESSED)){
+    if (device.getButtonState(BUTTON_A, BUTTON_PRESSED)) {
       device.serverEnd();
     }
   }
   else {
     for (uint8_t i = 0; gameobjects[i] != NULL; i++) {
+      //Serial.printf("trymove: %d\n", i);
       gameobjects[i]->move();
+      //Serial.printf("trydraw: %d\n", i);
       if (gameobjects[i]->show) gameobjects[i]->draw();
     }
     myATM0130.updateScreen();

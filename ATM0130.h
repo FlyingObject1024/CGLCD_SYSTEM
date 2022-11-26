@@ -26,7 +26,6 @@
 #define HEIGHT 120
 
 #define PI 3.141592653589793
-#define FLIP true
 
 class ATM0130 {
   public:

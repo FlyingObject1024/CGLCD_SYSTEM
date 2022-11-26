@@ -56,7 +56,7 @@ void BackGround::Cloud::draw() {
 }
 
 void BackGround::move() {
-  for (uint8_t i = 0; i < 10; i++) {
+  for (uint8_t i = 0; i < CLOUD_NUM; i++) {
     clouds[i].move();
   }
 }
@@ -83,7 +83,7 @@ void BackGround::drawOutSide() {
   myATM0130.drawBlock( (120 - myATM0130.frame) % 120, 20,  0, 16, 16, 16, imagemap);
   myATM0130.drawBlock( (190 - myATM0130.frame / 2) % 120, 25, 16, 32,  8,  8, imagemap);
 
-  for (i = 0; i < 10; i++) {
+  for (i = 0; i < CLOUD_NUM; i++) {
     clouds[i].draw();
   }
 

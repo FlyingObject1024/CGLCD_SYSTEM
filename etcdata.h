@@ -3,6 +3,8 @@
 
 #include "image.h"
 
+#define ARRAYSTOPPER 255
+
 enum {
   ACTION_NORMAL,
   ACTION_DANCE,
@@ -14,33 +16,18 @@ enum {
   ACTION_WOW,
   ACTION_DIE,
 };
+
 /*
   enum{
   BODY_SAMPLE,BODY_NORMAL0,BODY_NORMAL1,BODY_WOW,
   BODY_HEY,BODY_THAT,BODY_BACK,BODY_SIT,BODY_LIE,BODY_SLEEP0,BODY_SLEEP1,
-  BODY_DIE,BODY_WHAT,BODY_TYOKON,BODY_MOJI0,BODY_MOJI1,BODY_IMAGENUM
+  BODY_DIE,BODY_WHAT,BODY_TYOKON,BODY_MOJI0,BODY_MOJI1,BODY_IMAGENUM,
   };
   enum{
   EYE_NORMAL,EYE_SLEEPY0,EYE_SLEEPY1,EYE_CLOSE,EYE_HAPPY,EYE_SURPRISE,
-  EYE_ZITO,EYE_HOW,EYE_WINK,EYE_HIDE
-  };*/
-
-const uint8_t action_normal[6][2] PROGMEM = {
-  {1, 2},
-  {3, 4},
-  {5, 6},
-  {7, 8},
-  {9, 10},
-  {NULL, NULL},
-};
-
-const uint8_t action_normalt[3][2] PROGMEM = {
-  {101, 102},
-  {103, 104},
-  {NULL, NULL},
-};
-
-const uint8_t* act[2] = { &action_normal[0][0], &action_normalt[0][0] };
+  EYE_ZITO,EYE_HOW,EYE_WINK,EYE_HIDE,ARRAYSTOPPER
+  };
+*/
 
 const uint8_t anime_normal[17][2] PROGMEM = {
   {BODY_NORMAL0,EYE_NORMAL},
@@ -49,31 +36,45 @@ const uint8_t anime_normal[17][2] PROGMEM = {
   {BODY_NORMAL1,EYE_NORMAL},
   {BODY_NORMAL1,EYE_NORMAL},
   
-  {BODY_NORMAL1,EYE_CLOSE},
+  {BODY_NORMAL1,EYE_NORMAL},
   {BODY_NORMAL1,EYE_NORMAL},
   {BODY_NORMAL0,EYE_NORMAL},
-  {BODY_NORMAL0,EYE_CLOSE},
+  {BODY_NORMAL0,EYE_NORMAL},
   {BODY_NORMAL0,EYE_NORMAL},
   
   {BODY_NORMAL0,EYE_NORMAL},
   {BODY_NORMAL0,EYE_NORMAL},
   {BODY_NORMAL1,EYE_NORMAL},
-  {BODY_NORMAL1,EYE_CLOSE},
+  {BODY_NORMAL1,EYE_NORMAL},
   {BODY_NORMAL1,EYE_NORMAL},
   
-  {BODY_NORMAL0,EYE_CLOSE},
-  {NULL, NULL},
+  {BODY_NORMAL0,EYE_NORMAL},
+  {ARRAYSTOPPER, ARRAYSTOPPER},
 };
 
-const uint8_t anime_sleeping[7][2] PROGMEM = {
+const uint8_t anime_sleeping[19][2] PROGMEM = {
   {BODY_SLEEP0,EYE_CLOSE},
   {BODY_SLEEP0,EYE_CLOSE},
   {BODY_SLEEP0,EYE_CLOSE},
+  {BODY_SLEEP0,EYE_CLOSE},
+  {BODY_SLEEP0,EYE_CLOSE},
+  
+  {BODY_SLEEP0,EYE_CLOSE},
+  {BODY_SLEEP0,EYE_CLOSE},
+  {BODY_SLEEP0,EYE_CLOSE},
+  {BODY_SLEEP0,EYE_CLOSE},
+  {BODY_SLEEP1,EYE_CLOSE},
+  
+  {BODY_SLEEP1,EYE_CLOSE},
+  {BODY_SLEEP1,EYE_CLOSE},
+  {BODY_SLEEP1,EYE_CLOSE},
   {BODY_SLEEP1,EYE_CLOSE},
   {BODY_SLEEP1,EYE_CLOSE},
   
   {BODY_SLEEP1,EYE_CLOSE},
-  {NULL,NULL},
+  {BODY_SLEEP1,EYE_CLOSE},
+  {BODY_SLEEP1,EYE_CLOSE},
+  {ARRAYSTOPPER, ARRAYSTOPPER},
 };
 
 const uint8_t anime_sleepy[12][2] PROGMEM = {
@@ -90,15 +91,106 @@ const uint8_t anime_sleepy[12][2] PROGMEM = {
   {BODY_SIT,EYE_CLOSE},
   
   {BODY_SIT,EYE_CLOSE},
-  {NULL,NULL},
+  {ARRAYSTOPPER, ARRAYSTOPPER},
+};
+
+const uint8_t anime_stroke[9][2] PROGMEM = {
+  {BODY_NORMAL0,EYE_CLOSE},
+  {BODY_NORMAL0,EYE_CLOSE},
+  {BODY_STROKE,EYE_CLOSE},
+  {BODY_STROKE,EYE_CLOSE},
+  {BODY_NORMAL0,EYE_CLOSE},
+  
+  {BODY_NORMAL0,EYE_CLOSE},
+  {BODY_STROKE,EYE_CLOSE},
+  {BODY_STROKE,EYE_CLOSE},
+  {ARRAYSTOPPER, ARRAYSTOPPER},
+};
+
+const uint8_t anime_stroke_happy[9][2] PROGMEM = {
+  {BODY_NORMAL0,EYE_SAD},
+  {BODY_NORMAL0,EYE_SAD},
+  {BODY_STROKE,EYE_SAD},
+  {BODY_STROKE,EYE_SAD},
+  {BODY_NORMAL0,EYE_SAD},
+  
+  {BODY_NORMAL0,EYE_SAD},
+  {BODY_STROKE,EYE_SAD},
+  {BODY_STROKE,EYE_SAD}, 
+  {ARRAYSTOPPER, ARRAYSTOPPER},
+};
+
+const uint8_t anime_stroke_angry[9][2] PROGMEM = {
+  {BODY_NORMAL0,EYE_ANGRY},
+  {BODY_NORMAL0,EYE_ANGRY},
+  {BODY_STROKE,EYE_ANGRY},
+  {BODY_STROKE,EYE_ANGRY},
+  {BODY_NORMAL0,EYE_ANGRY},
+  
+  {BODY_NORMAL0,EYE_ANGRY},
+  {BODY_STROKE,EYE_ANGRY},
+  {BODY_STROKE,EYE_ANGRY},   
+  {ARRAYSTOPPER, ARRAYSTOPPER},
+};
+
+const uint8_t anime_call[3][2] PROGMEM = {
+  {BODY_WOW,EYE_HAU},
+  {BODY_WOW,EYE_HAU},  
+  {FLIPBODY,ARRAYSTOPPER},
+};
+
+const uint8_t anime_dance[3][2] PROGMEM = {
+  {BODY_WOW,EYE_HAPPY},
+  {BODY_WOW,EYE_HAPPY},   
+  {FLIPBODY,ARRAYSTOPPER},
+};
+
+const uint8_t anime_zito[2][2] PROGMEM = {
+  {BODY_NORMAL0,EYE_ZITO},
+  {ARRAYSTOPPER,ARRAYSTOPPER},
+};
+
+const uint8_t anime_die[2][2] PROGMEM = {
+  {BODY_DIE,EYE_HIDE},
+  {ARRAYSTOPPER,ARRAYSTOPPER},
+};
+
+const uint8_t anime_happy[2][2] PROGMEM = {
+  {BODY_NORMAL0,EYE_HAPPY},
+  {ARRAYSTOPPER,ARRAYSTOPPER},
+};
+
+const uint8_t* animations[11] PROGMEM = {
+  &anime_normal[0][0],
+  &anime_happy[0][0],
+  &anime_zito[0][0],
+  &anime_die[0][0],
+  &anime_sleeping[0][0],
+  &anime_sleepy[0][0],
+  &anime_stroke[0][0],
+  &anime_stroke_happy[0][0],
+  &anime_stroke_angry[0][0],  
+  &anime_dance[0][0],
+  &anime_call[0][0],
+};
+
+enum{
+  ANIME_NORMAL,ANIME_HAPPY,ANIME_ZITO,
+  ANIME_DIE,ANIME_SLEEPING,ANIME_SLEEPY,
+  ANIME_STROKE,ANIME_STROKE_HAPPY,ANIME_STROKE_ANGRY,
+  ANIME_DANCE,ANIME_CALL,
+  ANIME_NUM
 };
 
 
-
 /*
-const uint8_t* animations[] = {
-  &anime_normal[0][0],
-  &anime_sleeping[0][0],
+const uint8_t* behavior_normal[2] PROGMEM = {
+  &animations[ANIME_NORMAL],
+  &animations[ANIME_NORMAL],
+};
+
+const uint8_t** behaviors[1] PROGMEM = {
+  &behavior_normal[0],
 };*/
 
 #endif

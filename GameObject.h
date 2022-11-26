@@ -2,6 +2,15 @@
 #ifndef GAMEOBJECT_H_
 #define GAMEOBJECT_H_
 
+#define CLOUD_NUM 10
+
+enum{
+  STATE_NORMAL,
+  STATE_SLEEP,
+  STATE_STROKE,
+  STATE_STROKE_HAPPY,
+};
+
 class GameObject{
   public:
     bool show;
@@ -30,7 +39,7 @@ class BackGround : public GameObject{
     };
   public:
     BackGround();
-    Cloud clouds[10];
+    Cloud clouds[CLOUD_NUM];
     void drawOutSide();
     void move();
     void draw();
@@ -38,7 +47,9 @@ class BackGround : public GameObject{
 
 class Character : public GameObject{
   private:
-    void statusChanger();
+    uint8_t* animation;
+    void moveAnimation();
+    
   public:
     uint8_t life;//体力 0になると倒れる(不可逆)
     uint8_t stomach;//空腹度
@@ -52,13 +63,15 @@ class Character : public GameObject{
     
 
     Character();
+    void statusChanger();
     void move();
     void draw();
 
-    void changeState();
+    uint8_t state;
+    void changeState(uint8_t state);
 
-    uint8_t action;
-    uint8_t actionAnimationNum;
+    uint8_t behavior;
+    uint8_t animationNum;
     
     uint8_t eyeState;//現在の目の状態
     uint8_t bodyState;//現在の体の状態
@@ -72,10 +85,11 @@ class UI : public GameObject{
     int8_t UIcursor;
     int8_t secondCursor;
 
-
     void moveTouch();
     void moveEat();
+    void moveInfo();
     void moveSave();
+    void movePowor();
     void moveSetting();
     
     void drawMenubar();
@@ -84,7 +98,10 @@ class UI : public GameObject{
     void drawEat();
     void drawInfo();
     void drawSave();
+    void drawPowor();
     void drawSetting();
+
+    //void (UI::*moves[6])(void);
     
   public:
     UI();
