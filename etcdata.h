@@ -52,6 +52,22 @@ const uint8_t anime_normal[17][2] PROGMEM = {
   {ARRAYSTOPPER, ARRAYSTOPPER},
 };
 
+
+const uint8_t anime_happy[2][2] PROGMEM = {
+  {BODY_NORMAL0,EYE_HAPPY},
+  {ARRAYSTOPPER,ARRAYSTOPPER},
+};
+
+const uint8_t anime_zito[2][2] PROGMEM = {
+  {BODY_NORMAL0,EYE_ZITO},
+  {ARRAYSTOPPER,ARRAYSTOPPER},
+};
+
+const uint8_t anime_die[2][2] PROGMEM = {
+  {BODY_DIE,EYE_HIDE},
+  {ARRAYSTOPPER,ARRAYSTOPPER},
+};
+
 const uint8_t anime_sleeping[19][2] PROGMEM = {
   {BODY_SLEEP0,EYE_CLOSE},
   {BODY_SLEEP0,EYE_CLOSE},
@@ -77,20 +93,43 @@ const uint8_t anime_sleeping[19][2] PROGMEM = {
   {ARRAYSTOPPER, ARRAYSTOPPER},
 };
 
-const uint8_t anime_sleepy[12][2] PROGMEM = {
+const uint8_t anime_sleepy[31][2] PROGMEM = {
   {BODY_SIT,EYE_SLEEPY0},
   {BODY_SIT,EYE_SLEEPY0},
   {BODY_SIT,EYE_SLEEPY0},
+  {BODY_SIT,EYE_SLEEPY0},
+  {BODY_SIT,EYE_SLEEPY0},
+  
+  {BODY_SIT,EYE_SLEEPY0},
+  {BODY_SIT,EYE_SLEEPY0},
+  {BODY_SIT,EYE_SLEEPY0},
+  {BODY_SIT,EYE_SLEEPY0},
+  {BODY_SIT,EYE_SLEEPY0},
+  
+  {BODY_SIT,EYE_SLEEPY1},
+  {BODY_SIT,EYE_SLEEPY1},  
+  {BODY_SIT,EYE_SLEEPY1},
   {BODY_SIT,EYE_SLEEPY1},
   {BODY_SIT,EYE_SLEEPY1},
   
   {BODY_SIT,EYE_SLEEPY1},
+  {BODY_SIT,EYE_SLEEPY1},  
   {BODY_SIT,EYE_SLEEPY1},
   {BODY_SIT,EYE_SLEEPY1},
+  {BODY_SIT,EYE_SLEEPY1},
+  
+  {BODY_SIT,EYE_CLOSE},
+  {BODY_SIT,EYE_CLOSE},  
+  {BODY_SIT,EYE_CLOSE},
   {BODY_SIT,EYE_CLOSE},
   {BODY_SIT,EYE_CLOSE},
   
   {BODY_SIT,EYE_CLOSE},
+  {BODY_SIT,EYE_CLOSE},
+  {BODY_SIT,EYE_CLOSE},
+  {BODY_SIT,EYE_CLOSE},
+  {BODY_SIT,EYE_CLOSE},
+  
   {ARRAYSTOPPER, ARRAYSTOPPER},
 };
 
@@ -145,22 +184,22 @@ const uint8_t anime_dance[3][2] PROGMEM = {
   {FLIPBODY,ARRAYSTOPPER},
 };
 
-const uint8_t anime_zito[2][2] PROGMEM = {
-  {BODY_NORMAL0,EYE_ZITO},
+const uint8_t anime_eat[9][2] PROGMEM = {
+  {BODY_BACK,EYE_HIDE},
+  {BODY_BACK,EYE_HIDE},
+  {BODY_BACK,EYE_HIDE},
+  {FLIPBODY,EYE_HIDE},
+  {BODY_BACK,EYE_HIDE},
+  
+  {BODY_BACK,EYE_HIDE},
+  {BODY_BACK,EYE_HIDE},
+  {FLIPBODY,EYE_HIDE},
   {ARRAYSTOPPER,ARRAYSTOPPER},
 };
 
-const uint8_t anime_die[2][2] PROGMEM = {
-  {BODY_DIE,EYE_HIDE},
-  {ARRAYSTOPPER,ARRAYSTOPPER},
-};
 
-const uint8_t anime_happy[2][2] PROGMEM = {
-  {BODY_NORMAL0,EYE_HAPPY},
-  {ARRAYSTOPPER,ARRAYSTOPPER},
-};
 
-const uint8_t* animations[11] PROGMEM = {
+const uint8_t* animations[12] PROGMEM = {
   &anime_normal[0][0],
   &anime_happy[0][0],
   &anime_zito[0][0],
@@ -172,15 +211,17 @@ const uint8_t* animations[11] PROGMEM = {
   &anime_stroke_angry[0][0],  
   &anime_dance[0][0],
   &anime_call[0][0],
+  &anime_eat[0][0],
 };
 
 enum{
   ANIME_NORMAL,ANIME_HAPPY,ANIME_ZITO,
   ANIME_DIE,ANIME_SLEEPING,ANIME_SLEEPY,
   ANIME_STROKE,ANIME_STROKE_HAPPY,ANIME_STROKE_ANGRY,
-  ANIME_DANCE,ANIME_CALL,
+  ANIME_DANCE,ANIME_CALL,ANIME_EAT,
   ANIME_NUM
 };
+
 
 
 /*

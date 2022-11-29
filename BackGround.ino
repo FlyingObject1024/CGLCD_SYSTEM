@@ -122,6 +122,8 @@ void BackGround::draw() {
   myATM0130.drawLine(16, 55, 0, 96);
   myATM0130.drawLine(103, 55, 119, 96);
 
+  //植物
+  myATM0130.drawBlock(94, 34, 96 + character.love*8,  0, 8, 24, imagemap);
 
   //ちゃぶ台
   myATM0130.drawBlock(17, 58, 32,  0, 24, 16, imagemap);

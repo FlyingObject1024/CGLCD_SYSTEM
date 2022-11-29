@@ -218,7 +218,7 @@ void UI::drawInfo() {
   myATM0130.drawBlock_16px(34, 97, icon[ICON_GRAYSTMACH]);
   myATM0130.drawBlock_16px(34, 97, icon[ICON_STMACH], (uint8_t)(16 - 16.0 * (((double)character.stomach) / 100.0)), 0, 0, 0);
   myATM0130.drawBlock_16px(52, 89, icon[ICON_GRAYSLEEP]);
-  myATM0130.drawBlock_16px(52, 89, icon[ICON_SLEEP], (uint8_t)(16 - 16.0 * (((double)character.stomach) / 100.0)), 0, 0, 0);
+  myATM0130.drawBlock_16px(52, 89, icon[ICON_SLEEP], (uint8_t)(16 - 16.0 * (((double)character.sleepiness) / 100.0)), 0, 0, 0);
   myATM0130.drawBlock_16px(0, 0, icon[ICON_GRAYHEART]);
   myATM0130.drawBlock_16px(0, 0, icon[ICON_HEART], (uint8_t)(16 - 16.0 * (((double)character.life) / 100.0)), 0, 0, 0);
 }

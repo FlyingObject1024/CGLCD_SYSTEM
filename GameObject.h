@@ -6,6 +6,9 @@
 
 enum{
   STATE_NORMAL,
+  STATE_HUNGRY,
+  STATE_STARVE,
+  STATE_SLEEPY,
   STATE_SLEEP,
   STATE_STROKE,
   STATE_STROKE_HAPPY,
@@ -51,13 +54,14 @@ class Character : public GameObject{
     void moveAnimation();
     
   public:
-    uint8_t life;//体力 0になると倒れる(不可逆)
-    uint8_t stomach;//空腹度
+    int8_t life;//体力 0になると倒れる(不可逆)
+    int8_t stomach;//満腹度
     
+    int8_t sleepiness;//眠気(低いと眠い)    
     int8_t happiness;//楽しさ
-    int8_t favorability;//好感度
+    int8_t favorability;//一時好感度
     //happiness = 100*favorability/(time+favorability)
-
+    int8_t love;//真の好感度
     
     uint8_t loopTime;//パラメータ変動時間0になったら変動
     

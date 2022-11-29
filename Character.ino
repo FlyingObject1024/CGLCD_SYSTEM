@@ -8,45 +8,61 @@ Character::Character() {
   this->show = true;
   this->life = 50;
   this->stomach = 50;
+  this->sleepiness = 50;
   this->happiness = 50;
   this->favorability = 50;
-
-  this->loopTime = 10;
-
+  this->love = 0;
+  this->loopTime = 60;
   this->state = 0;
-
   this->behavior = 0;
-  changeState(ANIME_NORMAL);
-
+  changeState(STATE_NORMAL);
   this->eyeState = 0;
   this->bodyState = 0;
   this->flip = false;
 }
 
 void Character::statusChanger() {
-  if (this->stomach > 0) {
-    if (this->stomach >= 90) {
-      this->life++;
-      this->happiness++;
-      if (this->happiness  >= 95 && this->life >= 80) this->favorability++;
+  Serial.printf("\nCharacter:\nlife: %d, stomach: %d\nsleepiness: %d, favorability: %d,love: %d\nstate: %d\n\n", life, stomach, sleepiness, favorability, love, state);
+  if (this->state == STATE_SLEEP) {
+    this->sleepiness++;
+    if(this->sleepiness >= 100) changeState(STATE_NORMAL);
+  }
+  else{
+    //満腹度に関連する計算
+    if (this->stomach > 0) {
+      if (this->stomach >= 90 && this->sleepiness >= 10) {
+        this->life++;
+        this->happiness++;
+        if (this->happiness  >= 95 && this->life >= 80) this->favorability++;
+      }
+      this->stomach--;
+      this->happiness--;
+      //if(this->stomach <= 10) changeState(STATE_HUNGRY);
     }
-    this->stomach--;
-    this->happiness--;
+    else {
+      this->life--;
+      this->happiness -= 2;
+    }
+
+    this->sleepiness--;
+    if (this->sleepiness <= 5) {
+      changeState(STATE_SLEEPY);
+      if (this->sleepiness <= 0) this->sleepiness = 0;
+    }
+
+    if (this->happiness <= 0) {
+      this->happiness = 0;
+      this->favorability--;
+      if (this->favorability <= 0) this->favorability = 0;
+    }
   }
-  else {
-    this->life--;
-    this->happiness -= 2;
-  }
-  if (this->happiness <= 10) {
-    this->favorability--;
-    if (this->favorability) this->favorability = 0;
-  }
-  if(this->happiness <= 0) this->happiness = 0;
 }
 
 void Character::changeState(uint8_t state) {
+  //if(state == this->state) return;
   this->state = state;
-  if (this->state == STATE_SLEEP) animation = (uint8_t*)animations[ANIME_SLEEPING];
+  if      (this->state == STATE_SLEEP) animation = (uint8_t*)animations[ANIME_SLEEPING];
+  else if (this->state == STATE_SLEEPY) animation = (uint8_t*)animations[ANIME_SLEEPY];
   else if (this->state == STATE_STROKE) animation = (uint8_t*)animations[ANIME_STROKE];
   else if (this->state == STATE_STROKE_HAPPY) animation = (uint8_t*)animations[ANIME_STROKE_HAPPY];
   else animation = (uint8_t*)animations[ANIME_NORMAL];
@@ -54,19 +70,16 @@ void Character::changeState(uint8_t state) {
 }
 
 void Character::moveAnimation() {
-
   this->bodyState = pgm_read_byte(&(*animation));
   this->eyeState = pgm_read_byte(&(*(animation + 1)));
-  
-  this->animation+=2;
+
+  this->animation += 2;
   this->animationNum++;
 
   if (pgm_read_byte(&(*(animation))) == FLIPBODY) {
     this->flip = !this->flip;
-    Serial.println("FLIP");
-    Serial.println(pgm_read_byte(&(*(animation))));
   }
-  if (pgm_read_byte(&(*(animation+1))) == ARRAYSTOPPER) {
+  if (pgm_read_byte(&(*(animation + 1))) == ARRAYSTOPPER) {
     if (this->state == STATE_STROKE) {
       changeState(STATE_STROKE_HAPPY);
       this->happiness++;
@@ -74,21 +87,19 @@ void Character::moveAnimation() {
     else if (this->state == STATE_STROKE_HAPPY) {
       changeState(STATE_NORMAL);
     }
-    else{
+    else {
       changeState(this->state);
     }
-    Serial.printf("NULL: %d\n", NULL);
-    Serial.println(pgm_read_byte(&(*(animation + 3))));
   }
   Serial.printf("animationNum: %d,body: %d,eye: %d\n", animationNum, this->bodyState, this->eyeState);
 }
 
 void Character::move() {
-  if (myATM0130.frame % 10 == 0) {
+  if (myATM0130.frame % 2 == 0) {
     this->loopTime--;
+    if (this->loopTime % 10 == 0) statusChanger();
     if (this->loopTime == 0) {
-      statusChanger();
-      this->loopTime = 10;
+      this->loopTime = 60;
     }
   }
   if (this->state == STATE_NORMAL) {
@@ -151,16 +162,16 @@ void Character::drawEye() {
       myATM0130.drawBlock_4px(x + 18, y + 17, character_eye[this->eyeState * 2 + 1]);
     }
   }
-  else if(this->state == STATE_STROKE || this->state == STATE_STROKE_HAPPY) {
+  else if (this->state == STATE_STROKE || this->state == STATE_STROKE_HAPPY) {
     if (this->flip) {
-      myATM0130.drawFlipBlock_16px(x + 8, y - 4 + animationNum%4/2%2, icon[ICON_STROKE]);
-      myATM0130.drawFlipBlock_4px(x + 17, y + 10 + animationNum%4/2%2, character_eye[this->eyeState * 2]);
-      myATM0130.drawFlipBlock_4px(x + 10, y + 10 + animationNum%4/2%2, character_eye[this->eyeState * 2 + 1]);
+      myATM0130.drawFlipBlock_16px(x + 8, y - 4 + animationNum % 4 / 2 % 2, icon[ICON_STROKE]);
+      myATM0130.drawFlipBlock_4px(x + 17, y + 10 + animationNum % 4 / 2 % 2, character_eye[this->eyeState * 2]);
+      myATM0130.drawFlipBlock_4px(x + 10, y + 10 + animationNum % 4 / 2 % 2, character_eye[this->eyeState * 2 + 1]);
     }
     else {
-      myATM0130.drawBlock_16px(x + 9, y - 4 + animationNum%4/2%2, icon[ICON_STROKE]);
-      myATM0130.drawBlock_4px(x + 11, y + 10 + animationNum%4/2%2, character_eye[this->eyeState * 2]);
-      myATM0130.drawBlock_4px(x + 18, y + 10 + animationNum%4/2%2, character_eye[this->eyeState * 2 + 1]);
+      myATM0130.drawBlock_16px(x + 9, y - 4 + animationNum % 4 / 2 % 2, icon[ICON_STROKE]);
+      myATM0130.drawBlock_4px(x + 11, y + 10 + animationNum % 4 / 2 % 2, character_eye[this->eyeState * 2]);
+      myATM0130.drawBlock_4px(x + 18, y + 10 + animationNum % 4 / 2 % 2, character_eye[this->eyeState * 2 + 1]);
     }
   }
   else {
